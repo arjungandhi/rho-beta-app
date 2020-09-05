@@ -5,14 +5,29 @@ class RacketShell(Cmd):
     intro = 'Welcome to a "Racket" Shell. Type help or ? for a list for documentation'
     prompt = '>'
 
-    # 1. Addition (+)
-    # 2. Subtraction (-)
-    # 3. Division (/)
-    # 4. Multiplication (*)
-    # 5. Defining single character variables (define)
-    # 6. End the REPL (exit)
+    #user functions
 
+    def add(self, arg1, arg2):
+        print('add')
+    
+    def subtract(self, arg1, arg2):
+        print('subtract')
+    
+    def divide(self, arg1, arg2):
+        print('divide')
 
+    def multiply(self, arg1, arg2):
+        print('multiply')
+
+    def define(self, arg1, arg2):
+        print('define')
+
+    def exit(self):
+        print('byeeeee')
+        return True
+    
+
+    
     
     # library functions
     def default(self, line):
@@ -22,16 +37,66 @@ class RacketShell(Cmd):
     # internal functions
     # recursive function to runa
     def process_command(self, s):
+        ##command definitions
+        # 1. Addition (+)
+        # 2. Subtraction (-)
+        # 3. Division (/)
+        # 4. Multiplication (*)
+        # 5. Defining single character variables (define)
+        # 6. End the REPL (exit)
+        command_list= {
+            '+' : {
+                'num_arg' : 2,
+                'command': self.add
+
+            },
+            '-' : {
+                'num_arg' : 2,
+                'command': self.subtract
+
+            },
+            '/' : {
+                'num_arg' : 2,
+                'command': self.divide
+
+            },
+            '*' : {
+                'num_arg' : 2,
+                'command': self.multiply
+            },
+            'define' : {
+                'num_arg' : 2,
+                'command': self.define
+
+            },
+            'exit' : {
+                'num_arg' : 0,
+                'command': self.exit
+
+            }
+        }
+
+
+
+
+
+
         #check command has parens on the outside
         line = self.check_parens(s)
         if line: 
             #check for if command exits else return not found error
-            command = line.split()[0]
-            #arg fixer
+            command = line.split()[0].strip()
+            #arg finder
             args = self.arg_parser(line)
-
             #check if command is known if so run it with args
-            print(args)
+            if command in command_list.keys():
+                command = command_list[command]
+                if len(args) == command['num_arg']:
+                    command['command'](*args)
+                else:
+                    self.error(f'{command} takes {command["num_arg"]} positional arguments you gave {len(args)}')
+            else:
+                self.error(f'command: {command} is not a known command')
 
 
     def arg_parser(self,s):
@@ -51,14 +116,11 @@ class RacketShell(Cmd):
                 inside=True
                 inside_command += split_list[i] + ' '
                 if ')' in split_list[i]:
-                    arg_list.append(inside_command[:-1])
+                    arg_list.append(inside_command[:-12])
                     inside_command=''
                     inside=False
 
         return arg_list
-
-
-
 
 
 
