@@ -76,11 +76,6 @@ class RacketShell(Cmd):
             }
         }
 
-
-
-
-
-
         #check command has parens on the outside
         line = self.check_parens(s)
         if line: 
@@ -92,12 +87,19 @@ class RacketShell(Cmd):
             if command in command_list.keys():
                 command = command_list[command]
                 if len(args) == command['num_arg']:
-                    command['command'](*args)
+                    #check and execute any internal commands
+                    checked_args=for[self.arg_check(a) for a in args]
+                    command['command'](*checked_args)
                 else:
                     self.error(f'{command} takes {command["num_arg"]} positional arguments you gave {len(args)}')
             else:
                 self.error(f'command: {command} is not a known command')
 
+    def arg_check(self, a):
+        if '(' in a:
+            return process_command(a)
+        else:
+            return a 
 
     def arg_parser(self,s):
     # find and return a list of arguments from a string
@@ -116,9 +118,13 @@ class RacketShell(Cmd):
                 inside=True
                 inside_command += split_list[i] + ' '
                 if ')' in split_list[i]:
-                    arg_list.append(inside_command[:-12])
-                    inside_command=''
-                    inside=False
+                    # make sure ( and ) are same ammount before close
+                    num_open=len([c for c in inside_command if c =='('])
+                    num_close=len([c for c in inside_command if c ==')'])
+                    if num_open == num_close:
+                        arg_list.append(inside_command[:-1])
+                        inside_command=''
+                        inside=False
 
         return arg_list
 
