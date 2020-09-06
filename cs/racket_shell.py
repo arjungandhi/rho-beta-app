@@ -7,32 +7,43 @@ class RacketShell(Cmd):
 
     #user functions
 
+    variables = {}
+
     def add(self, arg1, arg2):
-        print('add')
+        return self.process_var(arg1) + self.process_var(arg2)
+
     
     def subtract(self, arg1, arg2):
-        print('subtract')
+         return self.process_var(arg1) - self.process_var(arg2)
     
     def divide(self, arg1, arg2):
-        print('divide')
+         return self.process_var(arg1) / self.process_var(arg2)
 
     def multiply(self, arg1, arg2):
-        print('multiply')
+         return self.process_var(arg1) * self.process_var(arg2)
 
     def define(self, arg1, arg2):
-        print('define')
+        if arg1.isalpha() and len(arg1) == 1:
+            if arg2.isnumeric():
+                variables[arg1] = int(arg2)
+                return(f'set {arg1} to {arg2}')
+            else:
+                self.error('argument 2 must be a number')
+        else:
+            self.error('argument 1 must be of a a-z character of length 1')
+
 
     def exit(self):
         print('byeeeee')
         return True
     
 
-    
+     
     
     # library functions
     def default(self, line):
         # only run commands only if command is first or last in line 
-       return self.process_command(line)
+       print(self.process_command(line))
 
     # internal functions
     # recursive function to runa
@@ -88,8 +99,8 @@ class RacketShell(Cmd):
                 command = command_list[command]
                 if len(args) == command['num_arg']:
                     #check and execute any internal commands
-                    checked_args=for[self.arg_check(a) for a in args]
-                    command['command'](*checked_args)
+                    checked_args=[self.arg_check(a) for a in args]
+                    return(command['command'](*checked_args))
                 else:
                     self.error(f'{command} takes {command["num_arg"]} positional arguments you gave {len(args)}')
             else:
@@ -97,7 +108,7 @@ class RacketShell(Cmd):
 
     def arg_check(self, a):
         if '(' in a:
-            return process_command(a)
+            return self.process_command(a)
         else:
             return a 
 
@@ -129,6 +140,17 @@ class RacketShell(Cmd):
         return arg_list
 
 
+    def process_var(self, arg):
+        if type(arg) is int or type(arg) is float:
+            return arg
+        elif type(arg) is str:
+            try: 
+                return self.variables(arg)
+            except:
+                self.error(f'no variable {arg} found')
+        else:
+            return False
+
 
 
     def check_parens(self, s):
@@ -142,7 +164,6 @@ class RacketShell(Cmd):
         print(f'Error: {reason}')
 
 
-    #user commands
 
 
 
